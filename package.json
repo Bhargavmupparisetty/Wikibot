@@ -1,0 +1,14 @@
+{
+  "name": "wikibot",
+  "version": "1.0.0",
+  "description": "This is a wikibot that is used to search for the word history and other simple searches.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bhargav Mupparisetty",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

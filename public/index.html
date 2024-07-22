@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WikiBot</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <style>
+    /* Additional custom styles */
+    header {
+      align-items: center;
+      background-color: rgb(150, 2, 248);
+      color: white;
+      font-size: 30px;
+      padding: 20px;
+      top: 0;
+      width: 100%;
+    }
+
+    footer {
+      background-color: rgb(150, 2, 248);
+      color: white;
+      font-size: 20px;
+      padding: 20px;
+      bottom: 0;
+      width: 100%;
+      align-self: baseline;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-gap: 10px;
+    }
+
+    .image-item {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>WikiBot</header>
+  <br><br><br><br><br><br><br>
+  <div class="container">
+    <div class="form-group">
+      <label for="userInput">Enter Prompt:</label>
+      <input type="text" class="form-control" id="userInput" placeholder="Type query...">
+    </div>
+    <button type="button" class="btn btn-primary" onclick="fetchData()">Generate Output</button>
+  </div>
+  <br><br>
+  <div class="container">
+    <h2 id="heading" style="color: blue;"></h2>
+    <br><br>
+    <p id="output" style="text-align: justify;"></p>
+    <br><br><br>
+    <textarea id="notes" rows="5" cols="50" placeholder="Write your notes here..."></textarea>
+    <button type="button" class="btn btn-secondary" onclick="submitNotes()">Submit Notes</button>
+    <br><br>
+    <textarea id="imageUrls" rows="5" cols="50"></textarea>
+    <div class="image-grid" id="imageContainer"></div>
+  </div>
+  <br><br>
+  <!-- Bootstrap JS and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script>
+    function stripHtmlTags(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      const text = div.textContent || div.innerText || '';
+      const cleanedText = text.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+      return cleanedText;
+    }
+
+    async function fetchData() {
+      const word = document.getElementById('userInput').value;
+      const heading = document.getElementById('heading');
+      heading.textContent = word;
+
+      const output = document.getElementById('output');
+      const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${word}&redirects=true&origin=*`;
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        const pages = data.query.pages;
+        const pageId = Object.keys(pages)[0];
+        const extract = pages[pageId].extract;
+        const cleanedExtract = stripHtmlTags(extract);
+        output.textContent = cleanedExtract;
+
+        // Call function to fetch and display images
+        scrapeImages(word);
+      } catch (error) {
+        output.textContent = "Failed to fetch data from Wikipedia";
+      }
+    }
+
+    async function scrapeImages(searchTerm) {
+      try {
+        const searchURL = `https://www.google.com/search?q=${searchTerm}&tbm=isch`;
+        const response = await fetch(searchURL);
+        const text = await response.text();
+
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(text, 'text/html');
+
+        const imageLinks = Array.from(htmlDoc.querySelectorAll('img'))
+          .map(img => img.src)
+          .filter(src => src.startsWith('http')); // Filter only valid image URLs
+
+        const dataTextArea = document.getElementById('imageUrls');
+        dataTextArea.value = imageLinks.join('\n');
+
+        // Display images in the grid
+        displayImages(imageLinks);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    }
+
+    function displayImages(imageUrls) {
+      const imageContainer = document.getElementById('imageContainer');
+      imageContainer.innerHTML = '';
+
+      imageUrls.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.classList.add('image-item');
+        imageContainer.appendChild(img);
+      });
+    }
+
+    async function submitNotes() {
+      const notes = document.getElementById('notes').value;
+
+      try {
+        const response = await fetch('/submit-notes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ notes })
+        });
+
+        if (response.ok) {
+          alert('Notes submitted successfully');
+        } else {
+          alert('Failed to submit notes');
+        }
+      } catch (error) {
+        console.error('Error submitting notes:', error);
+        alert('Error submitting notes');
+      }
+    }
+  </script>
+  <footer>@WikiBot.2023</footer>
+</body>
+</html>
