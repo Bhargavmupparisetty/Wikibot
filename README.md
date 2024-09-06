@@ -20,6 +20,7 @@ A Node.js project that provides a simple text search engine for querying Wikiped
 1. **Create a new project directory:**
     ```bash
     mkdir <project_name>
+    cd <project_name>
 
 2. **Clone the repository:**
 
