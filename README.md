@@ -25,6 +25,7 @@ A Node.js project that provides a simple text search engine for querying Wikiped
 2. **Clone the repository:**
 
    ```bash
+   node init -y
    git clone https://github.com/Bhargavmupparisetty/Wikibot.git
 
 3. **Install dependencies:**
@@ -35,6 +36,6 @@ A Node.js project that provides a simple text search engine for querying Wikiped
 4. **Start Server:**
 
    ```bash
-   npm start
+   node server.js
 Now after installing all the required dependencies, you can start the server and the server will run on `http://localhost:3000`.
 
