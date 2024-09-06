@@ -31,7 +31,7 @@ A Node.js project that provides a simple text search engine for querying Wikiped
 3. **Install dependencies:**
    
    ```bash
-   npm install
+   cd Wikibot
 
 4. **Start Server:**
 
